@@ -15,7 +15,7 @@ setuptools.setup(name = 'CleaningAmazonData',
       url = 'https://github.com/LajariAlandkar/CleaningAmazonData.git',
       install_requires =['pandas>=1.0.3', 
                          'nltk>=3.4.5', 
-                         're>=2.2.1', 
+                         're', 
                          'sklearn>=0.22.1']
       
       )
