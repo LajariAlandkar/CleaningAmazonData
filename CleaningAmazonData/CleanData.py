@@ -135,7 +135,7 @@ class CleanReviewFile(TransformerMixin, BaseEstimator):
             t = t.lower()
             t = RegexpTokenizer(r'[a-zA-Z]+').tokenize(t)
             t = [x for x in t if x not in stop_words]
-            t = [lemmatizer.lemmatize(x) for x in t ]
+            t = [lemmatizer.lemmatize(x, pos = "v") for x in t ]
             t = " ".join(t)
             return t
             
