@@ -11,7 +11,7 @@ Large amount of relevant medicinal food data has been scraped from amazon. It is
 * Removes unnecessary rows
 * Additionaly some feature engineering work. It adds following columns to dataframe
   1. 'category' - define category of product
-  2. 'ProcessedText' - Cleaned text with basic text preprocessing (remove stopwords, punctuation, digits, non-english character, lemmatization) applied to 'ReviewContent' field
+  2. 'ProcessedText' - Cleaned text with basic text preprocessing (remove stopwords, punctuation, digits, non-english character and lemmatize verb) applied to 'ReviewContent' field
  * Can be integrated with sklearn pipeline
   
 ## Installation
