@@ -35,6 +35,10 @@ Once you activated your virtual enviromnent, you need to install all the Python 
 
 `pip install -r requirement.txt`
 
+#### Install package
+
+``` pip install git+https://github.com/LajariAlandkar/CleaningAmazonData.git```
+
 ## Usage
 For usage, follow example.ipynb file
 
