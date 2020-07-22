@@ -33,7 +33,7 @@ Then create the virtual env on you local machine:
 #### Install requirements
 Once you activated your virtual enviromnent, you need to install all the Python packages that are required to run such datapipeline:
 
-`pip install -r requirements.txt`
+`pip install -r requirement.txt`
 
 ## Usage
 For usage, follow example.ipynb file
