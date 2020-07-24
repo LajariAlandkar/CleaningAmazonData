@@ -8,6 +8,11 @@ Created on Mon Jul 14 13:08:38 2020
 import pandas as pd
 from sklearn.base import TransformerMixin, BaseEstimator
 from re import search
+
+import nltk
+nltk.download('stopwords')
+nltk.download('wordnet')
+
 from nltk import RegexpTokenizer
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
@@ -36,7 +41,7 @@ class CleanDescriptionFile(TransformerMixin, BaseEstimator):
         if self.check_ASIN == True:
             col = X['ASIN'].copy()
             uniq_col = pd.Series(col.unique())
-            mask = (uniq_col.str.match(r'\bB[\dA-Z]{9}\b')) & (uniq_col.str.len()==10)
+            mask = (uniq_col.str.match(r'\b[B\d][\dA-Z]{9}\b')) & (uniq_col.str.len()==10)
             inval_ASIN = uniq_col[~mask]
             print(inval_ASIN)
             return inval_ASIN
@@ -50,7 +55,7 @@ class CleanDescriptionFile(TransformerMixin, BaseEstimator):
         X['Keyword'] = X['Keyword'].astype(str).str.replace('+',' ').str.replace('%27',"'").copy()
         X['MatchTerm'] = X['MatchTerm'].astype(str).str.replace('%27',"''").copy()
         X = X.fillna('Not Available').copy()
-        X['RetrivedTime'] = pd.to_datetime(X['RetrievedTime']).copy()
+        X['RetrievedTime'] = pd.to_datetime(X['RetrievedTime']).copy()
         X = X[~(X['ProductName'] == 'No_Name')]
         
         def classify(row):
@@ -116,7 +121,7 @@ class CleanReviewFile(TransformerMixin, BaseEstimator):
         if self.check_ASIN == True:
             col = X['ASIN'].copy()
             uniq_col = pd.Series(col.unique())
-            mask = (uniq_col.str.match(r'\bB[\dA-Z]{9}\b')) & (uniq_col.str.len()==10)
+            mask = (uniq_col.str.match(r'\b[B\d][\dA-Z]{9}\b')) & (uniq_col.str.len()==10)
             inval_ASIN = uniq_col[~mask]
             print(inval_ASIN)
             return inval_ASIN
