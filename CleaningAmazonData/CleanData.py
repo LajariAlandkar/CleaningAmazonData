@@ -145,7 +145,7 @@ class CleanReviewFile(TransformerMixin, BaseEstimator):
 
         X['ReviewEarly'] = X['ReviewEarly'].astype('int')
         X['ReviewStar'] = X['ReviewStar'].astype('float')
-        X['ReviewTime'] = X(df_reviews['ReviewTime'])
+        X['ReviewTime'] = pd.to_datetime(X['ReviewTime'])
         X['ReviewVerifiedP'] = X['ReviewVerifiedP'].astype('int')
         X['ReviewVine'] = X['ReviewVine'].astype('int')
 
