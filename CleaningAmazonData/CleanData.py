@@ -57,6 +57,13 @@ class CleanDescriptionFile(TransformerMixin, BaseEstimator):
         X = X.fillna('Not Available').copy()
         X['RetrievedTime'] = pd.to_datetime(X['RetrievedTime']).copy()
         X = X[~(X['ProductName'] == 'No_Name')]
+
+        X.rename(columns={"TotalCustRatings": "TotalCustomerRatings"}, inplace=True)
+        X['ExclusionInProduct'] = X['ExclusionInProduct'].astype('int')
+        X['IngredientInProduct'] = X['IngredientInProduct'].astype('int')
+        X['KeywordDept'] =X['KeywordDept'].astype('int')
+        X['TotalCustomerRatings'] = X['TotalCustomerRatings'].apply(lambda x: x.replace(',','')).astype('int')
+        X['ProductStar'] = X['ProductStar'].astype('float')
         
         def classify(row):
             if search(r"[tT][eE][aA]|Traditional Medicinals Nighty Night Valerian,",row):
@@ -135,6 +142,13 @@ class CleanReviewFile(TransformerMixin, BaseEstimator):
         X['ReviewHelpful'] = X['ReviewHelpful'].astype(str).str.replace(',','').astype('int64')
         X = X.fillna({'ReviewersName':'Not Available', 'ReviewContent':'Not Available'})
         X = X[~(X['ProductName'] == 'No_Name')]
+
+        X['ReviewEarly'] = X['ReviewEarly'].astype('int')
+        X['ReviewStar'] = X['ReviewStar'].astype('float')
+        X['ReviewTime'] = X(df_reviews['ReviewTime'])
+        X['ReviewVerifiedP'] = X['ReviewVerifiedP'].astype('int')
+        X['ReviewVine'] = X['ReviewVine'].astype('int')
+
         
         def cleanreview(t):
             t = t.lower()
