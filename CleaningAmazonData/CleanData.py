@@ -8,10 +8,12 @@ Created on Mon Jul 14 13:08:38 2020
 import pandas as pd
 from sklearn.base import TransformerMixin, BaseEstimator
 from re import search
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 import nltk
 nltk.download('stopwords')
 nltk.download('wordnet')
+nltk.download('vader_lexicon')
 
 from nltk import RegexpTokenizer
 from nltk.corpus import stopwords
@@ -19,7 +21,8 @@ from nltk.stem import WordNetLemmatizer
 
 
 lemmatizer = WordNetLemmatizer()
-stop_words = set(stopwords.words('english')) 
+stop_words = set(stopwords.words('english'))
+SIA = SentimentIntensityAnalyzer()
 
 class CleanDescriptionFile(TransformerMixin, BaseEstimator):
     '''This subclass is used to cleaning the data in description file'''
@@ -110,9 +113,10 @@ class CleanDescriptionFile(TransformerMixin, BaseEstimator):
 class CleanReviewFile(TransformerMixin, BaseEstimator):
     '''This subclass is used to cleaning the data in review file'''
     
-    def __init__(self, check_ASIN = True, add_ProcessedText = True):
+    def __init__(self, check_ASIN = True, add_ProcessedText = True, add_Vader = True):
         self.check_ASIN = check_ASIN
         self.add_ProcessedText = add_ProcessedText
+        self.add_Vader = add_Vader
         
 
     def fit(self, X, y=None):
@@ -160,6 +164,14 @@ class CleanReviewFile(TransformerMixin, BaseEstimator):
             
         if self.add_ProcessedText == True:
             X['ProcessedText'] = X['ReviewContent'].map(cleanreview)
+
+        def vaderscore(r):
+            r = SIA.polarity_scores(r)
+            r = r['compound']
+            return r
+            
+        if self.add_Vader == True:
+            X['VaderScore'] = X['ReviewContent'].map(vaderscore)
    
         return X
     
