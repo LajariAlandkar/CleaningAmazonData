@@ -194,7 +194,7 @@ class CleanReviewFile(TransformerMixin, BaseEstimator):
             X['VaderScore'] = X['ReviewContent'].map(vaderscore)
 
         def tfidfvectorize(r):
-            r = vectorizer_art.transform(r)
+            r = vectorizer_art.transform([r])
             return r
 
         def eval_sleep(r):
