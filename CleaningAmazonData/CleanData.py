@@ -198,15 +198,15 @@ class CleanReviewFile(TransformerMixin, BaseEstimator):
             return r
 
         def eval_sleep(r):
-            r = sleep_art.predict(r)
+            r = sleep_art.predict(r)[0]
             return r
 
         def eval_stress(r):
-            r = stress_art.predict(r)
+            r = stress_art.predict(r)[0]
             return r
 
         def eval_anxiety(r):
-            r = anxierty_art.predict(r)
+            r = anxierty_art.predict(r)[0]
             return r
 
         if self.add_effectiveness == True:
@@ -214,7 +214,7 @@ class CleanReviewFile(TransformerMixin, BaseEstimator):
             X['Sleep'] = X['Vec'].map(eval_sleep)
             X['Stress'] = X['Vec'].map(eval_stress)
             X['Anxiety'] = X['Vec'].map(eval_anxiety)
-            X.drop(columns=['Vec'])
+            X.drop(columns=['Vec'], axis=1, inplace=True)
    
         return X
     
