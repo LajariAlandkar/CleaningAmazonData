@@ -198,15 +198,15 @@ class CleanReviewFile(TransformerMixin, BaseEstimator):
             return r
 
         def eval_sleep(r):
-            r = sleep_art.predict([r])
+            r = sleep_art.predict(r)
             return r
 
         def eval_stress(r):
-            r = stress_art.predict([r])
+            r = stress_art.predict(r)
             return r
 
         def eval_anxiety(r):
-            r = anxierty_art.predict([r])
+            r = anxierty_art.predict(r)
             return r
 
         if self.add_effectiveness == True:
