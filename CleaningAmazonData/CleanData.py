@@ -187,7 +187,7 @@ class CleanReviewFile(TransformerMixin, BaseEstimator):
 
         def vaderscore(r):
             r = SIA.polarity_scores(r)
-            r = r['Compound']
+            r = r['compound']
             return r
             
         if self.add_Vader == True:
