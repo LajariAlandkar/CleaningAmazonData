@@ -34,9 +34,9 @@ stLink = 'https://github.com/El-Chepe/CleaningAmazonData/blob/master/Devices/str
 aLink = 'https://github.com/El-Chepe/CleaningAmazonData/blob/master/Devices/anxiety.pkl?raw=true'
 
 vfile = BytesIO(requests.get(vLink).content)
-slfile = BytesIO(requests.get(vLink).content)
-stfile = BytesIO(requests.get(vLink).content)
-afile = BytesIO(requests.get(vLink).content)
+slfile = BytesIO(requests.get(slLink).content)
+stfile = BytesIO(requests.get(stLink).content)
+afile = BytesIO(requests.get(aLink).content)
 
 vectorizer_art = joblib.load(vfile)
 sleep_art = joblib.load(slfile)
