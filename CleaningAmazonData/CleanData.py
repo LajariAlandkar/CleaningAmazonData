@@ -7,6 +7,7 @@ Created on Mon Jul 14 13:08:38 2020
 
 import pandas as pd
 from sklearn.base import TransformerMixin, BaseEstimator
+from sklearn.externals import joblib
 from re import search
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
@@ -19,10 +20,28 @@ from nltk import RegexpTokenizer
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 
-
+#Instantiating
 lemmatizer = WordNetLemmatizer()
 stop_words = set(stopwords.words('english'))
 SIA = SentimentIntensityAnalyzer()
+
+from io import BytesIO
+import requests
+
+vLink = 'https://github.com/El-Chepe/CleaningAmazonData/blob/master/Devices/vectorizer.pkl?raw=true'
+slLink = 'https://github.com/El-Chepe/CleaningAmazonData/blob/master/Devices/sleep.pkl?raw=true'
+stLink = 'https://github.com/El-Chepe/CleaningAmazonData/blob/master/Devices/stress.pkl?raw=true'
+aLink = 'https://github.com/El-Chepe/CleaningAmazonData/blob/master/Devices/anxiety.pkl?raw=true'
+
+vfile = BytesIO(requests.get(vLink).content)
+slfile = BytesIO(requests.get(vLink).content)
+stfile = BytesIO(requests.get(vLink).content)
+afile = BytesIO(requests.get(vLink).content)
+
+vectorizer_art = joblib.load(vfile)
+sleep_art = joblib.load(slfile)
+stress_art = joblib.load(stfile)
+anxierty_art = joblib.load(afile)
 
 class CleanDescriptionFile(TransformerMixin, BaseEstimator):
     '''This subclass is used to cleaning the data in description file'''
@@ -113,10 +132,11 @@ class CleanDescriptionFile(TransformerMixin, BaseEstimator):
 class CleanReviewFile(TransformerMixin, BaseEstimator):
     '''This subclass is used to cleaning the data in review file'''
     
-    def __init__(self, check_ASIN = True, add_ProcessedText = True, add_Vader = True):
+    def __init__(self, check_ASIN = True, add_ProcessedText = True, add_Vader = True, add_effectiveness = True):
         self.check_ASIN = check_ASIN
         self.add_ProcessedText = add_ProcessedText
         self.add_Vader = add_Vader
+        self.add_effectiveness = add_effectiveness       
         
 
     def fit(self, X, y=None):
@@ -167,11 +187,34 @@ class CleanReviewFile(TransformerMixin, BaseEstimator):
 
         def vaderscore(r):
             r = SIA.polarity_scores(r)
-            r = r['compound']
+            r = r['Compound']
             return r
             
         if self.add_Vader == True:
             X['VaderScore'] = X['ReviewContent'].map(vaderscore)
+
+        def tfidfvectorize(r):
+            r = vectorizer_art.transform(r)
+            return r
+
+        def eval_sleep(r):
+            r = sleep_art.predict(r)
+            return r
+
+        def eval_stress(r):
+            r = stress_art.predict(r)
+            return r
+
+        def eval_anxiety(r):
+            r = anxierty_art.predict(r)
+            return r
+
+        if self.add_effectiveness == True:
+            X['Vec'] = X['ProcessedText'].map(tfidfvectorize)
+            X['Sleep'] = X['Vec'].map(eval_sleep)
+            X['Stress'] = X['Vec'].map(eval_stress)
+            X['Anxiety'] = X['Vec'].map(eval_anxiety)
+            X.drop(columns=['Vec'])
    
         return X
     
