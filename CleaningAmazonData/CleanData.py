@@ -32,16 +32,19 @@ vLink = 'https://github.com/El-Chepe/CleaningAmazonData/blob/master/Devices/vect
 slLink = 'https://github.com/El-Chepe/CleaningAmazonData/blob/master/Devices/sleep.pkl?raw=true'
 stLink = 'https://github.com/El-Chepe/CleaningAmazonData/blob/master/Devices/stress.pkl?raw=true'
 aLink = 'https://github.com/El-Chepe/CleaningAmazonData/blob/master/Devices/anxiety.pkl?raw=true'
+eLink = 'https://github.com/El-Chepe/CleaningAmazonData/blob/master/Devices/general.pkl?raw=true'
 
 vfile = BytesIO(requests.get(vLink).content)
 slfile = BytesIO(requests.get(slLink).content)
 stfile = BytesIO(requests.get(stLink).content)
 afile = BytesIO(requests.get(aLink).content)
+efile = BytesIO(requests.get(eLink).content)
 
 vectorizer_art = joblib.load(vfile)
 sleep_art = joblib.load(slfile)
 stress_art = joblib.load(stfile)
 anxierty_art = joblib.load(afile)
+effectiveness_art = joblib.load(efile)
 
 class CleanDescriptionFile(TransformerMixin, BaseEstimator):
     '''This subclass is used to cleaning the data in description file'''
@@ -209,11 +212,16 @@ class CleanReviewFile(TransformerMixin, BaseEstimator):
             r = anxierty_art.predict(r)[0]
             return r
 
+        def eval_effectiveness(r):
+            r = effectiveness_art.predict(r)[0]
+            return r
+
         if self.add_effectiveness == True:
             X['Vec'] = X['ProcessedText'].map(tfidfvectorize)
-            X['Sleep'] = X['Vec'].map(eval_sleep)
-            X['Stress'] = X['Vec'].map(eval_stress)
-            X['Anxiety'] = X['Vec'].map(eval_anxiety)
+            #X['Sleep'] = X['Vec'].map(eval_sleep)
+            #X['Stress'] = X['Vec'].map(eval_stress)
+            #X['Anxiety'] = X['Vec'].map(eval_anxiety)
+            X['Effectiveness'] = X['Vec'].map(eval_effectiveness)
             X.drop(columns=['Vec'], axis=1, inplace=True)
    
         return X
