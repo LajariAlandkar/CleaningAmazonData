@@ -7,19 +7,44 @@ Created on Mon Jul 14 13:08:38 2020
 
 import pandas as pd
 from sklearn.base import TransformerMixin, BaseEstimator
+from sklearn.externals import joblib
 from re import search
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 import nltk
 nltk.download('stopwords')
 nltk.download('wordnet')
+nltk.download('vader_lexicon')
 
 from nltk import RegexpTokenizer
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 
-
+#Instantiating
 lemmatizer = WordNetLemmatizer()
-stop_words = set(stopwords.words('english')) 
+stop_words = set(stopwords.words('english'))
+SIA = SentimentIntensityAnalyzer()
+
+from io import BytesIO
+import requests
+
+vLink = 'https://github.com/El-Chepe/CleaningAmazonData/blob/master/Devices/vectorizer.pkl?raw=true'
+slLink = 'https://github.com/El-Chepe/CleaningAmazonData/blob/master/Devices/sleep.pkl?raw=true'
+stLink = 'https://github.com/El-Chepe/CleaningAmazonData/blob/master/Devices/stress.pkl?raw=true'
+aLink = 'https://github.com/El-Chepe/CleaningAmazonData/blob/master/Devices/anxiety.pkl?raw=true'
+eLink = 'https://github.com/El-Chepe/CleaningAmazonData/blob/master/Devices/general.pkl?raw=true'
+
+vfile = BytesIO(requests.get(vLink).content)
+slfile = BytesIO(requests.get(slLink).content)
+stfile = BytesIO(requests.get(stLink).content)
+afile = BytesIO(requests.get(aLink).content)
+efile = BytesIO(requests.get(eLink).content)
+
+vectorizer_art = joblib.load(vfile)
+sleep_art = joblib.load(slfile)
+stress_art = joblib.load(stfile)
+anxierty_art = joblib.load(afile)
+effectiveness_art = joblib.load(efile)
 
 class CleanDescriptionFile(TransformerMixin, BaseEstimator):
     '''This subclass is used to cleaning the data in description file'''
@@ -57,6 +82,13 @@ class CleanDescriptionFile(TransformerMixin, BaseEstimator):
         X = X.fillna('Not Available').copy()
         X['RetrievedTime'] = pd.to_datetime(X['RetrievedTime']).copy()
         X = X[~(X['ProductName'] == 'No_Name')]
+
+        X.rename(columns={"TotalCustRatings": "TotalCustomerRatings"}, inplace=True)
+        X['ExclusionInProduct'] = X['ExclusionInProduct'].astype('int')
+        X['IngredientInProduct'] = X['IngredientInProduct'].astype('int')
+        X['KeywordDept'] =X['KeywordDept'].astype('int')
+        X['TotalCustomerRatings'] = X['TotalCustomerRatings'].apply(lambda x: x.replace(',','')).astype('int')
+        X['ProductStar'] = X['ProductStar'].astype('float')
         
         def classify(row):
             if search(r"[tT][eE][aA]|Traditional Medicinals Nighty Night Valerian,",row):
@@ -103,9 +135,11 @@ class CleanDescriptionFile(TransformerMixin, BaseEstimator):
 class CleanReviewFile(TransformerMixin, BaseEstimator):
     '''This subclass is used to cleaning the data in review file'''
     
-    def __init__(self, check_ASIN = True, add_ProcessedText = True):
+    def __init__(self, check_ASIN = True, add_ProcessedText = True, add_Vader = True, add_effectiveness = True):
         self.check_ASIN = check_ASIN
         self.add_ProcessedText = add_ProcessedText
+        self.add_Vader = add_Vader
+        self.add_effectiveness = add_effectiveness       
         
 
     def fit(self, X, y=None):
@@ -135,6 +169,13 @@ class CleanReviewFile(TransformerMixin, BaseEstimator):
         X['ReviewHelpful'] = X['ReviewHelpful'].astype(str).str.replace(',','').astype('int64')
         X = X.fillna({'ReviewersName':'Not Available', 'ReviewContent':'Not Available'})
         X = X[~(X['ProductName'] == 'No_Name')]
+
+        X['ReviewEarly'] = X['ReviewEarly'].astype('int')
+        X['ReviewStar'] = X['ReviewStar'].astype('float')
+        X['ReviewTime'] = pd.to_datetime(X['ReviewTime'])
+        X['ReviewVerifiedP'] = X['ReviewVerifiedP'].astype('int')
+        X['ReviewVine'] = X['ReviewVine'].astype('int')
+
         
         def cleanreview(t):
             t = t.lower()
@@ -146,6 +187,42 @@ class CleanReviewFile(TransformerMixin, BaseEstimator):
             
         if self.add_ProcessedText == True:
             X['ProcessedText'] = X['ReviewContent'].map(cleanreview)
+
+        def vaderscore(r):
+            r = SIA.polarity_scores(r)
+            r = r['compound']
+            return r
+            
+        if self.add_Vader == True:
+            X['VaderScore'] = X['ReviewContent'].map(vaderscore)
+
+        def tfidfvectorize(r):
+            r = vectorizer_art.transform([r])
+            return r
+
+        def eval_sleep(r):
+            r = sleep_art.predict(r)[0]
+            return r
+
+        def eval_stress(r):
+            r = stress_art.predict(r)[0]
+            return r
+
+        def eval_anxiety(r):
+            r = anxierty_art.predict(r)[0]
+            return r
+
+        def eval_effectiveness(r):
+            r = effectiveness_art.predict(r)[0]
+            return r
+
+        if self.add_effectiveness == True:
+            X['Vec'] = X['ProcessedText'].map(tfidfvectorize)
+            #X['Sleep'] = X['Vec'].map(eval_sleep)
+            #X['Stress'] = X['Vec'].map(eval_stress)
+            #X['Anxiety'] = X['Vec'].map(eval_anxiety)
+            X['Effectiveness'] = X['Vec'].map(eval_effectiveness)
+            X.drop(columns=['Vec'], axis=1, inplace=True)
    
         return X
     
