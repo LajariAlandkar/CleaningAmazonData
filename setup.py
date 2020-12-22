@@ -8,7 +8,7 @@ Created on Sat Jul 18 07:37:35 2020
 import setuptools
 
 setuptools.setup(name = 'CleaningAmazonData',
-      version = '0.0.1',
+      version = '0.1.0',
       description = 'Package to clean Amazon scraped data',
       author = 'Lajari Alandkar',
       packages = setuptools.find_packages(),
